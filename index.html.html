@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg, #87CEEB 0%, #d0eeff 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 10px 20px;
+}
+#top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 460px;
+  margin-bottom: 10px;
+}
+#nivel-txt {
+  font-size: 26px;
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+#categoria-txt {
+  font-size: 15px;
+  background: rgba(255,255,255,0.75);
+  color: #1a6faa;
+  border-radius: 12px;
+  padding: 4px 14px;
+  font-weight: 700;
+}
+#imagen-box {
+  background: white;
+  border-radius: 28px;
+  padding: 16px 24px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.13);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 460px;
+  position: relative;
+}
+#emoji-animal {
+  font-size: 110px;
+  filter: brightness(0);
+  transition: filter 0.5s;
+  line-height: 1;
+  user-select: none;
+}
+#emoji-animal.revelado { filter: brightness(1); }
+#btn-lampara {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+#btn-lampara:active { transform: scale(0.88); }
+#btn-lampara.usada { opacity: 0.35; cursor: default; }
+#pista-box {
+  font-size: 17px;
+  color: #b07d00;
+  background: #fff9e0;
+  border-radius: 12px;
+  padding: 8px 16px;
+  margin-top: 8px;
+  font-weight: 700;
+  text-align: center;
+  display: none;
+}
+#pista-box.visible { display: block; }
+#casillas {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 460px;
+}
+.casilla {
+  width: 54px;
+  height: 64px;
+  background: white;
+  border: 3px solid #1a6faa;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 900;
+  color: #1a6faa;
+  text-transform: uppercase;
+  transition: transform 0.1s;
+}
+.casilla.ok {
+  border-color: #27ae60;
+  color: #27ae60;
+  background: #eafff2;
+}
+.casilla.pop { transform: scale(1.25); }
+#opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 12px;
+  max-width: 460px;
+}
+.btn-letra {
+  width: 64px;
+  height: 64px;
+  font-size: 30px;
+  font-weight: 900;
+  background: white;
+  border: none;
+  border-radius: 16px;
+  color: #1a6faa;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.13);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: transform 0.08s;
+}
+.btn-letra:active { transform: scale(0.91); }
+.btn-letra:disabled { background: #d0e8f5; color: #aaa; box-shadow: none; cursor: default; }
+#btn-borrar {
+  font-size: 22px;
+  background: #ffe0e0;
+  color: #e74c3c;
+  border: none;
+  border-radius: 16px;
+  width: 64px;
+  height: 64px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.10);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+#btn-borrar:active { transform: scale(0.92); }
+#mensaje {
+  font-size: 24px;
+  font-weight: 800;
+  min-height: 34px;
+  color: white;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  text-align: center;
+}
+#overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(20,100,190,0.90);
+  z-index: 50;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+}
+#overlay.on { display: flex; }
+#ov-emoji { font-size: 80px; margin-bottom: 10px; }
+#ov-titulo { font-size: 34px; color: white; font-weight: 900; margin-bottom: 10px; line-height: 1.2; }
+#ov-texto { font-size: 20px; color: #d0eeff; margin-bottom: 28px; }
+#btn-sig {
+  font-size: 26px;
+  font-weight: 800;
+  background: white;
+  color: #1a6faa;
+  border: none;
+  border-radius: 20px;
+  padding: 16px 48px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+#btn-sig:active { transform: scale(0.96); }
+</style>
+</head>
+<body>
+
+<div id="top">
+  <div id="nivel-txt">Nivel 1</div>
+  <div id="categoria-txt">🐾 Animales</div>
+</div>
+
+<div id="imagen-box">
+  <button id="btn-lampara" onclick="darPista()" title="Pista">💡</button>
+  <div id="emoji-animal">🐯</div>
+  <div id="pista-box"></div>
+</div>
+
+<div id="casillas"></div>
+<div id="opciones"></div>
+<button id="btn-borrar" onclick="borrar()">⌫ Borrar</button>
+<div id="mensaje"></div>
+
+<div id="overlay">
+  <div id="ov-emoji">🎉</div>
+  <div id="ov-titulo"></div>
+  <div id="ov-texto"></div>
+  <button id="btn-sig" onclick="siguiente()">¡Siguiente! ▶</button>
+</div>
+
+<script>
+// ── AUDIO ──────────────────────────────────────────────
+let ctx = null;
+function getCtx() {
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+  return ctx;
+}
+
+function beep(freq, type, duration, vol, delay=0) {
+  const c = getCtx();
+  const o = c.createOscillator();
+  const g = c.createGain();
+  o.connect(g); g.connect(c.destination);
+  o.type = type;
+  o.frequency.setValueAtTime(freq, c.currentTime + delay);
+  g.gain.setValueAtTime(vol, c.currentTime + delay);
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + delay + duration);
+  o.start(c.currentTime + delay);
+  o.stop(c.currentTime + delay + duration + 0.05);
+}
+
+function sonidoLetra() {
+  beep(520, 'sine', 0.08, 0.3);
+}
+
+function sonidoError() {
+  beep(200, 'sawtooth', 0.18, 0.25);
+  beep(160, 'sawtooth', 0.18, 0.2, 0.15);
+}
+
+function sonidoNivel() {
+  // fanfarria alegre
+  const notas = [523, 659, 784, 1047];
+  notas.forEach((f, i) => beep(f, 'sine', 0.22, 0.35, i * 0.13));
+}
+
+function sonidoFanfarra100() {
+  // súper fanfarria cada 100 niveles
+  const notas = [523,659,784,659,784,1047,1047];
+  notas.forEach((f,i) => beep(f, 'triangle', 0.28, 0.4, i*0.12));
+}
+
+function sonidoPista() {
+  beep(700, 'sine', 0.12, 0.2);
+  beep(900, 'sine', 0.12, 0.2, 0.13);
+}
+
+// ── DATOS ──────────────────────────────────────────────
+const items = [
+  { emoji:"🐯", nombre:"TIGRE",      categoria:"Animales",  pista:"Es un felino con rayas anaranjadas" },
+  { emoji:"🐶", nombre:"PERRO",      categoria:"Animales",  pista:"Es el mejor amigo del hombre" },
+  { emoji:"🐱", nombre:"GATO",       categoria:"Animales",  pista:"Le encanta dormir y ronronear" },
+  { emoji:"🐮", nombre:"VACA",       categoria:"Animales",  pista:"Nos da leche todos los días" },
+  { emoji:"🐷", nombre:"CERDO",      categoria:"Animales",  pista:"Es rosado y dice oinc oinc" },
+  { emoji:"🦁", nombre:"LEON",       categoria:"Animales",  pista:"Es el rey de la selva" },
+  { emoji:"🐻", nombre:"OSO",        categoria:"Animales",  pista:"Hiberna en invierno" },
+  { emoji:"🦊", nombre:"ZORRO",      categoria:"Animales",  pista:"Es muy astuto y es naranja" },
+  { emoji:"🐸", nombre:"RANA",       categoria:"Animales",  pista:"Vive cerca del agua y salta" },
+  { emoji:"🐧", nombre:"PINGUINO",   categoria:"Animales",  pista:"Vive en el frío y no vuela" },
+  { emoji:"🦒", nombre:"JIRAFA",     categoria:"Animales",  pista:"Tiene el cuello muy largo" },
+  { emoji:"🐘", nombre:"ELEFANTE",   categoria:"Animales",  pista:"El animal terrestre más grande" },
+  { emoji:"🦓", nombre:"CEBRA",      categoria:"Animales",  pista:"Es como un caballo con rayas" },
+  { emoji:"🐺", nombre:"LOBO",       categoria:"Animales",  pista:"Aúlla a la luna" },
+  { emoji:"🦆", nombre:"PATO",       categoria:"Animales",  pista:"Nada en el agua y dice cuac" },
+  { emoji:"🐰", nombre:"CONEJO",     categoria:"Animales",  pista:"Tiene orejas largas y come zanahoria" },
+  { emoji:"🐢", nombre:"TORTUGA",    categoria:"Animales",  pista:"Camina muy despacio y tiene caparazón" },
+  { emoji:"🦋", nombre:"MARIPOSA",   categoria:"Animales",  pista:"Tiene alas de colores y vuela" },
+  { emoji:"🦜", nombre:"LORO",       categoria:"Animales",  pista:"Ave que repite lo que decís" },
+  { emoji:"🐊", nombre:"COCODRILO",  categoria:"Animales",  pista:"Reptil verde con dientes enormes" },
+  { emoji:"🦘", nombre:"CANGURO",    categoria:"Animales",  pista:"Lleva a sus crías en una bolsa" },
+  { emoji:"🐬", nombre:"DELFIN",     categoria:"Animales",  pista:"Mamífero marino muy inteligente" },
+  { emoji:"🦔", nombre:"ERIZO",      categoria:"Animales",  pista:"Tiene puas en la espalda" },
+  { emoji:"🐓", nombre:"GALLO",      categoria:"Animales",  pista:"Canta al amanecer" },
+  { emoji:"🍎", nombre:"MANZANA",    categoria:"Frutas",    pista:"Roja o verde, muy crujiente" },
+  { emoji:"🍌", nombre:"BANANA",     categoria:"Frutas",    pista:"Amarilla y curvada" },
+  { emoji:"🍊", nombre:"NARANJA",    categoria:"Frutas",    pista:"Redonda, anaranjada y con jugo" },
+  { emoji:"🍇", nombre:"UVAS",       categoria:"Frutas",    pista:"Vienen en racimos, hacen vino" },
+  { emoji:"🍓", nombre:"FRUTILLA",   categoria:"Frutas",    pista:"Roja con puntitos, dulce y chica" },
+  { emoji:"🍑", nombre:"DURAZNO",    categoria:"Frutas",    pista:"Suave por fuera y tiene carozo" },
+  { emoji:"🍍", nombre:"ANANA",      categoria:"Frutas",    pista:"Tiene corona de hojas y es tropical" },
+  { emoji:"🥭", nombre:"MANGO",      categoria:"Frutas",    pista:"Tropical, anaranjado por dentro" },
+  { emoji:"🍋", nombre:"LIMON",      categoria:"Frutas",    pista:"Amarillo y muy ácido" },
+  { emoji:"🍒", nombre:"CEREZA",     categoria:"Frutas",    pista:"Chiquita y roja con rabito" },
+  { emoji:"🥝", nombre:"KIWI",       categoria:"Frutas",    pista:"Verde por dentro y peludo por fuera" },
+  { emoji:"🍉", nombre:"SANDIA",     categoria:"Frutas",    pista:"Verde por fuera, roja por dentro" },
+  { emoji:"🥥", nombre:"COCO",       categoria:"Frutas",    pista:"Redondo, peludo y tropical" },
+  { emoji:"🍕", nombre:"PIZZA",      categoria:"Comidas",   pista:"Italiana, redonda y con queso" },
+  { emoji:"🍔", nombre:"HAMBURGUESA",categoria:"Comidas",   pista:"Pan, carne y queso apilados" },
+  { emoji:"🍝", nombre:"FIDEOS",     categoria:"Comidas",   pista:"Se comen con salsa de tomate" },
+  { emoji:"🌮", nombre:"TACO",       categoria:"Comidas",   pista:"Comida mexicana doblada" },
+  { emoji:"🍦", nombre:"HELADO",     categoria:"Comidas",   pista:"Frío, dulce y en cucurucho" },
+  { emoji:"🎂", nombre:"TORTA",      categoria:"Comidas",   pista:"Se come en los cumpleaños" },
+  { emoji:"🍜", nombre:"SOPA",       categoria:"Comidas",   pista:"Caliente, líquida y reconfortante" },
+  { emoji:"🥚", nombre:"HUEVO",      categoria:"Comidas",   pista:"Lo ponen las gallinas" },
+  { emoji:"🧀", nombre:"QUESO",      categoria:"Comidas",   pista:"Lácteo amarillo que va en la pizza" },
+  { emoji:"🍫", nombre:"CHOCOLATE",  categoria:"Comidas",   pista:"Dulce, marrón y muy rico" },
+  { emoji:"🍪", nombre:"GALLETA",    categoria:"Comidas",   pista:"Pequeña, crujiente y dulce" },
+  { emoji:"🪑", nombre:"SILLA",      categoria:"Hogar",     pista:"La usás para sentarte" },
+  { emoji:"🛏️",nombre:"CAMA",       categoria:"Hogar",     pista:"Ahí dormís de noche" },
+  { emoji:"🪞", nombre:"ESPEJO",     categoria:"Hogar",     pista:"Te muestra tu reflejo" },
+  { emoji:"📺", nombre:"TELE",       categoria:"Hogar",     pista:"Pantalla grande para ver series" },
+  { emoji:"💡", nombre:"LAMPARA",    categoria:"Hogar",     pista:"Da luz cuando está oscuro" },
+  { emoji:"🚿", nombre:"DUCHA",      categoria:"Hogar",     pista:"Te bañás abajo de ella" },
+  { emoji:"🧹", nombre:"ESCOBA",     categoria:"Hogar",     pista:"Con ella barrés el piso" },
+  { emoji:"🛋️",nombre:"SOFA",       categoria:"Hogar",     pista:"Mueble cómodo para descansar" },
+  { emoji:"🚪", nombre:"PUERTA",     categoria:"Hogar",     pista:"La abrís para entrar o salir" },
+  { emoji:"👒", nombre:"SOMBRERO",   categoria:"Ropa",      pista:"Va en la cabeza para el sol" },
+  { emoji:"👗", nombre:"VESTIDO",    categoria:"Ropa",      pista:"Prenda femenina de una sola pieza" },
+  { emoji:"👟", nombre:"ZAPATILLA",  categoria:"Ropa",      pista:"Calzado cómodo para caminar" },
+  { emoji:"🧤", nombre:"GUANTE",     categoria:"Ropa",      pista:"Cubre las manos en invierno" },
+  { emoji:"🧣", nombre:"BUFANDA",    categoria:"Ropa",      pista:"Larga y abriga el cuello" },
+  { emoji:"🧦", nombre:"MEDIA",      categoria:"Ropa",      pista:"Va en el pie dentro del zapato" },
+  { emoji:"👔", nombre:"CAMISA",     categoria:"Ropa",      pista:"Prenda con botones y cuello" },
+  { emoji:"🌺", nombre:"FLOR",       categoria:"Naturaleza",pista:"Crece en el jardín y es colorida" },
+  { emoji:"🌳", nombre:"ARBOL",      categoria:"Naturaleza",pista:"Tiene tronco, ramas y hojas" },
+  { emoji:"🌙", nombre:"LUNA",       categoria:"Naturaleza",pista:"Brilla de noche en el cielo" },
+  { emoji:"⭐", nombre:"ESTRELLA",   categoria:"Naturaleza",pista:"Puntito brillante en el cielo nocturno" },
+  { emoji:"🌈", nombre:"ARCOIRIS",   categoria:"Naturaleza",pista:"Sale después de la lluvia con colores" },
+  { emoji:"🌊", nombre:"OLA",        categoria:"Naturaleza",pista:"El mar la trae a la orilla" },
+  { emoji:"❄️", nombre:"NIEVE",      categoria:"Naturaleza",pista:"Cae en invierno, fría y blanca" },
+  { emoji:"🌵", nombre:"CACTUS",     categoria:"Naturaleza",pista:"Planta del desierto con espinas" },
+  { emoji:"🍄", nombre:"HONGO",      categoria:"Naturaleza",pista:"Crece en el bosque húmedo" },
+];
+
+let nivel=1, item=null, respuesta=[], opciones=[], pistaUsada=false, orden=[];
+
+function mezclar(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function hacerOpciones(nombre){
+  let set=[...nombre.split('')];
+  for(let c of 'AEIOURSTLNMCPBDFGHJK'.split('')){
+    if(set.length>=nombre.length+4)break;
+    if(!set.includes(c))set.push(c);
+  }
+  return mezclar(set);
+}
+
+function getCatEmoji(cat){
+  return {Animales:'🐾',Frutas:'🍓',Comidas:'🍽️',Hogar:'🏠',Ropa:'👚',Naturaleza:'🌿'}[cat]||'🎯';
+}
+
+function cargar(n){
+  nivel=n;
+  if(n===1||orden.length===0) orden=mezclar([...Array(items.length).keys()]);
+  item=items[orden[(n-1)%items.length]];
+  respuesta=[]; opciones=hacerOpciones(item.nombre); pistaUsada=false;
+
+  document.getElementById('nivel-txt').textContent='Nivel '+n;
+  document.getElementById('categoria-txt').textContent=getCatEmoji(item.categoria)+' '+item.categoria;
+  document.getElementById('mensaje').textContent='';
+
+  const em=document.getElementById('emoji-animal');
+  em.textContent=item.emoji; em.className='';
+
+  const pb=document.getElementById('pista-box');
+  pb.className=''; pb.textContent='';
+
+  const lamp=document.getElementById('btn-lampara');
+  lamp.className=''; lamp.textContent='💡';
+
+  renderCasillas(); renderOpciones();
+}
+
+function darPista(){
+  if(pistaUsada)return;
+  pistaUsada=true;
+  sonidoPista();
+  const pb=document.getElementById('pista-box');
+  pb.textContent='💡 '+item.pista; pb.className='visible';
+  const lamp=document.getElementById('btn-lampara');
+  lamp.className='usada'; lamp.textContent='🔦';
+}
+
+function renderCasillas(){
+  const cont=document.getElementById('casillas');
+  cont.innerHTML='';
+  for(let i=0;i<item.nombre.length;i++){
+    const d=document.createElement('div');
+    d.className='casilla'+(respuesta[i]?' ok':'');
+    d.textContent=respuesta[i]||'';
+    cont.appendChild(d);
+  }
+}
+
+function renderOpciones(){
+  const cont=document.getElementById('opciones');
+  cont.innerHTML='';
+  const usadas={};
+  respuesta.forEach(l=>usadas[l]=(usadas[l]||0)+1);
+  const enNombre={};
+  item.nombre.split('').forEach(l=>enNombre[l]=(enNombre[l]||0)+1);
+  opciones.forEach(l=>{
+    const btn=document.createElement('button');
+    btn.className='btn-letra'; btn.textContent=l;
+    btn.onclick=()=>elegir(l);
+    if((usadas[l]||0)>=(enNombre[l]||0))btn.disabled=true;
+    cont.appendChild(btn);
+  });
+}
+
+function elegir(letra){
+  if(respuesta.length>=item.nombre.length)return;
+  sonidoLetra();
+  respuesta.push(letra);
+  renderCasillas(); renderOpciones();
+  // pop animación en última casilla
+  const casillas=document.querySelectorAll('.casilla');
+  const ultima=casillas[respuesta.length-1];
+  if(ultima){ultima.classList.add('pop');setTimeout(()=>ultima.classList.remove('pop'),150);}
+  verificar();
+}
+
+function borrar(){
+  if(!respuesta.length)return;
+  respuesta.pop();
+  renderCasillas(); renderOpciones();
+  document.getElementById('mensaje').textContent='';
+}
+
+function verificar(){
+  if(respuesta.length<item.nombre.length)return;
+  if(respuesta.join('')===item.nombre){
+    document.getElementById('emoji-animal').className='revelado';
+    document.getElementById('mensaje').textContent='¡Muy bien! 🎉';
+    if(nivel%100===0) sonidoFanfarra100(); else sonidoNivel();
+    setTimeout(()=>abrirOverlay(),900);
+  } else {
+    sonidoError();
+    document.getElementById('mensaje').textContent='¡Casi! Intentá de nuevo 😊';
+    setTimeout(()=>{
+      respuesta=[];
+      renderCasillas(); renderOpciones();
+      document.getElementById('mensaje').textContent='';
+    },1100);
+  }
+}
+
+function abrirOverlay(){
+  document.getElementById('overlay').className='on';
+  if(nivel%100===0){
+    document.getElementById('ov-emoji').textContent='💰🌟';
+    document.getElementById('ov-titulo').textContent='¡Increíble! ¡'+nivel+' niveles!';
+    document.getElementById('ov-texto').textContent='¡Muy bien hecho, Facu te debe 10 lucas! 😄';
+  } else {
+    document.getElementById('ov-emoji').textContent='🎊';
+    document.getElementById('ov-titulo').textContent='¡Nivel '+nivel+' superado!';
+    document.getElementById('ov-texto').textContent='¡Qué lista! ¡Seguí así!';
+  }
+}
+
+function siguiente(){
+  document.getElementById('overlay').className='';
+  cargar(nivel+1);
+}
+
+cargar(1);
+</script>
+</body>
+</html>
